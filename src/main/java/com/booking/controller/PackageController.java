@@ -1,8 +1,11 @@
  package com.booking.controller;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.booking.model.Packages;
 import com.booking.service.PackageService;
+import com.booking.utility.CommonUtility;
 
 @Controller
 public class PackageController {
@@ -25,12 +29,15 @@ public class PackageController {
 	@Autowired
 	private PackageService packageService;
 	
-	@RequestMapping(value = "addPackage", method = RequestMethod.GET)
-	public String addPackage(@ModelAttribute("addPackage") Packages packages, Model model, HttpSession session, BindingResult result) {
-		return "addPackage";
+	private CommonUtility commonUtility;
+	
+	@RequestMapping(value = "/admin/addPackage", method = RequestMethod.GET)
+	public String addPackage(@ModelAttribute("addPackage") Packages packages, Model model, HttpSession session, BindingResult result, HttpServletRequest request) throws MalformedURLException {
+		//System.out.println(commonUtility.getURLBase(request.getRequestURL().toString()));
+		return "admin/addPackage";
 	}
 	
-	@RequestMapping(value = "addPackage", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/addPackage", method = RequestMethod.POST)
 	public void addPackage(@Valid @ModelAttribute("addPackage") Packages packages, Model model, BindingResult result, HttpServletResponse response) throws IOException {
 		
 		if(result.hasErrors()) {
@@ -38,38 +45,40 @@ public class PackageController {
 		}
 		packageService.save(packages);
 		
-		response.sendRedirect("listPackages.html");
+		response.sendRedirect("/admin/listPackages.html");
 	}
 	
-	@RequestMapping(value = "deletePackage/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/deletePackage/{id}", method = RequestMethod.GET)
 	public void deletePackage(@PathVariable("id") Long id, Model model, HttpSession session, HttpServletResponse response) throws IOException {
 		packageService.delete(id);
-		response.sendRedirect("listPackages.html");
+		response.sendRedirect("/admin/listPackages.html");
 	}
 	
-	@RequestMapping(value = "listPackages", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/listPackages", method = RequestMethod.GET)
 	public String listPackages(Model model, HttpSession session) {
 		List<Packages> packageList = packageService.findAllPackages();
 		model.addAttribute("packageList", packageList);
-		return "listPackages";
+		return "/admin/listPackages";
 	}
 	
-	@RequestMapping(value = "editPackage/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/admin/editPackage/{id}", method = RequestMethod.GET)
 	public String editPackage(@PathVariable("id") Long id, @ModelAttribute("editPackage") Packages packages, Model model, HttpSession session) {
 		packages = packageService.findPackage(id);
 		System.out.println(packages);
 		model.addAttribute("packages", packages);
-		return "editPackage";
+		return "/admin/editPackage";
 	}
 	
-	@RequestMapping(value = "editPackage/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "/admin/editPackage/{id}", method = RequestMethod.POST)
 	public String editPackage(@PathVariable("id") Long id, @ModelAttribute("editPackage") Packages packages, Model model, HttpSession session, BindingResult result, HttpServletResponse response) throws IOException {
 		if(result.hasErrors()) {
-			response.sendRedirect("editPackage/"+id+".html");
+			response.sendRedirect("/admin/editPackage/"+id+".html");
 		}
 		packageService.save(packages);
 		
-		response.sendRedirect("listPackages.html");
+		response.sendRedirect("/admin/listPackages.html");
 		return "editPackage";
 	}
+	
+	
 }
